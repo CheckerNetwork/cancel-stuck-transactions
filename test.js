@@ -1,7 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import timers from 'node:timers/promises'
-import { StuckTransactionsCanceller, cancelTx } from './index.js'
+import {
+  StuckTransactionsCanceller,
+  cancelTx,
+  getRecentSendMessage
+} from './index.js'
 
 test('StuckTransactionsCanceller', async () => {
   const tx = {
@@ -113,4 +117,15 @@ test('cancelTx()', async () => {
     to: '0x0',
     value: 0
   }])
+})
+
+test('getRecentSendMessage()', async () => {
+  const sendMessage = await getRecentSendMessage()
+  assert.strictEqual(typeof sendMessage.cid, 'string')
+  assert.strictEqual(typeof sendMessage.timestamp, 'number')
+  assert(
+    typeof sendMessage.receipt === 'object' && sendMessage.receipt !== null
+  )
+  assert.strictEqual(typeof sendMessage.receipt.gasUsed, 'number')
+  assert.strictEqual(typeof sendMessage.gasFeeCap, 'string')
 })

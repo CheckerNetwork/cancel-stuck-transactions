@@ -27,6 +27,25 @@ export const cancelTx = ({
   })
 }
 
+export const getRecentSendMessage = async () => {
+  let res = await fetch('https://filfox.info/api/v1/message/list?method=Send')
+  if (!res.ok) {
+    throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
+  }
+  const body = await res.json()
+  assert(body.messages.length > 0, '/message/list returned an empty list')
+  const sendMsg = body.messages.find(m => m.method === 'Send')
+  assert(sendMsg, 'No Send message found in the recent committed messages')
+  const cid = sendMsg.cid
+
+  res = await fetch(`https://filfox.info/api/v1/message/${cid}`)
+  if (!res.ok) {
+    throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
+  }
+
+  return await res.json()
+}
+
 export class StuckTransactionsCanceller {
   #store
   #log
@@ -79,7 +98,7 @@ export class StuckTransactionsCanceller {
       )
     }
 
-    const recentSendMessage = await this.#getRecentSendMessage()
+    const recentSendMessage = await getRecentSendMessage()
     this.#log(
       'Calculating gas fees from the recent Send message ' +
       recentSendMessage.cid +
@@ -120,24 +139,5 @@ export class StuckTransactionsCanceller {
     await replacementTx.wait()
     await this.#store.remove(tx.hash)
     this.#log(`Replaced ${tx.hash} with ${replacementTx.hash}`)
-  }
-
-  async #getRecentSendMessage () {
-    let res = await fetch('https://filfox.info/api/v1/message/list?method=Send')
-    if (!res.ok) {
-      throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
-    }
-    const body = await res.json()
-    assert(body.messages.length > 0, '/message/list returned an empty list')
-    const sendMsg = body.messages.find(m => m.method === 'Send')
-    assert(sendMsg, 'No Send message found in the recent committed messages')
-    const cid = sendMsg.cid
-
-    res = await fetch(`https://filfox.info/api/v1/message/${cid}`)
-    if (!res.ok) {
-      throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
-    }
-
-    return await res.json()
   }
 }

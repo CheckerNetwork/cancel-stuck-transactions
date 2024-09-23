@@ -113,3 +113,18 @@ Options:
 - `recentGasFeeCap`: `bigint`
 - `log`: `(str: string) -> null`
 - `sendTransactions`: `(Transaction) -> Promise<Transaction>`
+
+### `getRecentSendMessage() -> Promise<SendMessage>`
+
+```js
+import { getRecentSendMessage } from 'cancel-stuck-transactions'
+```
+
+Helper method that fetches a recent `SendMessage`.
+
+`SendMessage` has keys (and more):
+- `cid`: `string`
+- `timestamp`: `number`
+- `receipt`: `object`
+  -  `gasUsed`: `number`
+- `gasFeeCap`: `string`
