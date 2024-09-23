@@ -114,6 +114,11 @@ Options:
 - `log`: `(str: string) -> null`
 - `sendTransactions`: `(Transaction) -> Promise<Transaction>`
 
+Throws:
+- `err.code === 'NONCE_EXPIRED'`: The transaction can't be replaced because
+it has already been confirmed
+- _potentially more_
+
 ### `getRecentSendMessage() -> Promise<SendMessage>`
 
 ```js
