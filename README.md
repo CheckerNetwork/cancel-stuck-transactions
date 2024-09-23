@@ -41,7 +41,7 @@ const stuckTransactionsCanceller = new StuckTransactionsCanceller({
 // Start the cancel transactions loop
 ;(async () => {
   while (true) {
-    await stuckTransactionsCanceller.olderThan(TEN_MINUTES)
+    await stuckTransactionsCanceller.cancelOlderThan(TEN_MINUTES)
     await timers.setTimeout(ONE_MINUTE)
   }
 })()
@@ -90,6 +90,6 @@ from ethers.js.
 
 Remove `tx` because it is successful.
 
-### `#olderThan(ms) -> Promise`
+### `#cancelOlderThan(ms) -> Promise`
 
 Cancel transactions older than `ms`.

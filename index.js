@@ -33,7 +33,7 @@ export class StuckTransactionsCanceller {
     await this.#store.remove(tx.hash)
   }
 
-  async olderThan (ageMs) {
+  async cancelOlderThan (ageMs) {
     assert.strictEqual(typeof ageMs, 'number')
 
     this.#log('Checking for stuck transactions...')

@@ -61,12 +61,12 @@ test('StuckTransactionsCanceller', async () => {
     nonce: tx.nonce
   })
 
-  await stuckTransactionsCanceller.olderThan(1e10)
+  await stuckTransactionsCanceller.cancelOlderThan(1e10)
   assert.deepStrictEqual(sentTransactions, [])
   assert(storage.has(tx.hash))
 
   await timers.setImmediate()
-  await stuckTransactionsCanceller.olderThan(0)
+  await stuckTransactionsCanceller.cancelOlderThan(0)
   assert.strictEqual(sentTransactions.length, 1)
   const sentTransactionClone = { ...sentTransactions[0] }
   assert(sentTransactionClone.gasLimit)
