@@ -7,87 +7,199 @@ import {
   getRecentSendMessage
 } from './index.js'
 
-test('StuckTransactionsCanceller', async () => {
-  const tx = {
-    hash: 'hash',
-    maxPriorityFeePerGas: 10n,
-    nonce: 20,
-    from: '0x0'
-  }
-  const storage = new Map()
-  const sentTransactions = []
-  const stuckTransactionsCanceller = new StuckTransactionsCanceller({
-    store: {
-      add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
-        assert(!storage.has(hash))
-        assert.strictEqual(typeof hash, 'string')
-        assert.strictEqual(typeof timestamp, 'string')
-        assert.strictEqual(typeof from, 'string')
-        assert.strictEqual(typeof maxPriorityFeePerGas, 'bigint')
-        assert.strictEqual(typeof nonce, 'number')
-        storage.set(hash, {
-          hash,
-          timestamp,
-          from,
-          maxPriorityFeePerGas,
-          nonce
-        })
-      },
-      list () {
-        return [...storage.values()]
-      },
-      remove (hash) {
-        assert(storage.has(hash))
-        assert.strictEqual(typeof hash, 'string')
-        storage.delete(hash)
-      }
-    },
-    log: () => {
-      // TODO: Test logs
-    },
-    sendTransaction (tx) {
-      sentTransactions.push(tx)
-      return {
-        hash: 'replacementTxHash',
-        wait: () => {}
-      }
+test('StuckTransactionsCanceller', async t => {
+  await t.test('#addPending()', async () => {
+    const tx = {
+      hash: 'hash',
+      maxPriorityFeePerGas: 10n,
+      nonce: 20,
+      from: '0x0'
     }
+    const storage = new Map()
+    const stuckTransactionsCanceller = new StuckTransactionsCanceller({
+      store: {
+        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+          assert(!storage.has(hash))
+          assert.strictEqual(typeof hash, 'string')
+          assert.strictEqual(typeof timestamp, 'string')
+          assert.strictEqual(typeof from, 'string')
+          assert.strictEqual(typeof maxPriorityFeePerGas, 'bigint')
+          assert.strictEqual(typeof nonce, 'number')
+          storage.set(hash, {
+            hash,
+            timestamp,
+            from,
+            maxPriorityFeePerGas,
+            nonce
+          })
+        },
+        list () {
+          throw new Error('Should not be called')
+        },
+        remove (hash) {
+          throw new Error('Should not be called')
+        }
+      },
+      log: () => {
+        // TODO: Test logs
+      },
+      sendTransaction () {
+        throw new Error('Should not be called')
+      }
+    })
+    await stuckTransactionsCanceller.addPending(tx)
+    assert(storage.has(tx.hash))
+    const storedTxClone = { ...storage.get(tx.hash) }
+    assert(storedTxClone.timestamp)
+    delete storedTxClone.timestamp
+    assert.deepStrictEqual(storedTxClone, {
+      hash: tx.hash,
+      from: tx.from,
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+      nonce: tx.nonce
+    })
   })
-  await stuckTransactionsCanceller.addPending(tx)
-  assert(storage.has(tx.hash))
-  const storedTxClone = { ...storage.get(tx.hash) }
-  assert(storedTxClone.timestamp)
-  delete storedTxClone.timestamp
-  assert.deepStrictEqual(storedTxClone, {
-    hash: tx.hash,
-    from: tx.from,
-    maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-    nonce: tx.nonce
+  await t.test('#cancelOlderThan', async t => {
+    await t.test('nothing to cancel', async t => {
+      const tx = {
+        hash: 'hash',
+        maxPriorityFeePerGas: 10n,
+        nonce: 20,
+        from: '0x0'
+      }
+      const storage = new Map()
+      const sentTransactions = []
+      const stuckTransactionsCanceller = new StuckTransactionsCanceller({
+        store: {
+          add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+            assert(!storage.has(hash))
+            storage.set(hash, {
+              hash,
+              timestamp,
+              from,
+              maxPriorityFeePerGas,
+              nonce
+            })
+          },
+          list () {
+            return [...storage.values()]
+          },
+          remove (hash) {
+            throw new Error('Should not be called')
+          }
+        },
+        log: () => {
+          // TODO: Test logs
+        },
+        sendTransaction (tx) {
+          throw new Error('Should not be called')
+        }
+      })
+      await stuckTransactionsCanceller.addPending(tx)
+      await stuckTransactionsCanceller.cancelOlderThan(1e10)
+      assert.deepStrictEqual(sentTransactions, [])
+      assert(storage.has(tx.hash))
+    })
   })
-
-  await stuckTransactionsCanceller.cancelOlderThan(1e10)
-  assert.deepStrictEqual(sentTransactions, [])
-  assert(storage.has(tx.hash))
-
-  await timers.setImmediate()
-  await stuckTransactionsCanceller.cancelOlderThan(0)
-  assert.strictEqual(sentTransactions.length, 1)
-  const sentTransactionClone = { ...sentTransactions[0] }
-  assert(sentTransactionClone.gasLimit)
-  assert(sentTransactionClone.maxFeePerGas)
-  delete sentTransactionClone.gasLimit
-  delete sentTransactionClone.maxFeePerGas
-  assert.deepStrictEqual(sentTransactionClone, {
-    maxPriorityFeePerGas: 13n,
-    nonce: tx.nonce,
-    to: tx.from,
-    value: 0
+  await t.test('cancel old transactions', async t => {
+    const tx = {
+      hash: 'hash',
+      maxPriorityFeePerGas: 10n,
+      nonce: 20,
+      from: '0x0'
+    }
+    const storage = new Map()
+    const sentTransactions = []
+    const stuckTransactionsCanceller = new StuckTransactionsCanceller({
+      store: {
+        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+          assert(!storage.has(hash))
+          storage.set(hash, {
+            hash,
+            timestamp,
+            from,
+            maxPriorityFeePerGas,
+            nonce
+          })
+        },
+        list () {
+          return [...storage.values()]
+        },
+        remove (hash) {
+          assert(storage.has(hash))
+          assert.strictEqual(typeof hash, 'string')
+          storage.delete(hash)
+        }
+      },
+      log: () => {
+        // TODO: Test logs
+      },
+      sendTransaction (tx) {
+        sentTransactions.push(tx)
+        return {
+          hash: 'replacementTxHash',
+          wait: () => {}
+        }
+      }
+    })
+    await stuckTransactionsCanceller.addPending(tx)
+    await timers.setImmediate()
+    await stuckTransactionsCanceller.cancelOlderThan(0)
+    assert.strictEqual(sentTransactions.length, 1)
+    const sentTransactionClone = { ...sentTransactions[0] }
+    assert(sentTransactionClone.gasLimit)
+    assert(sentTransactionClone.maxFeePerGas)
+    delete sentTransactionClone.gasLimit
+    delete sentTransactionClone.maxFeePerGas
+    assert.deepStrictEqual(sentTransactionClone, {
+      maxPriorityFeePerGas: 13n,
+      nonce: tx.nonce,
+      to: tx.from,
+      value: 0
+    })
+    assert.deepStrictEqual(storage, new Map())
   })
-  assert.deepStrictEqual(storage, new Map())
+  await t.test('#removeSuccessful()', async t => {
+    const tx = {
+      hash: 'hash',
+      maxPriorityFeePerGas: 10n,
+      nonce: 20,
+      from: '0x0'
+    }
+    const storage = new Map()
+    const stuckTransactionsCanceller = new StuckTransactionsCanceller({
+      store: {
+        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+          assert(!storage.has(hash))
+          storage.set(hash, {
+            hash,
+            timestamp,
+            from,
+            maxPriorityFeePerGas,
+            nonce
+          })
+        },
+        list () {
+          throw new Error('Should not be called')
+        },
+        remove (hash) {
+          assert(storage.has(hash))
+          assert.strictEqual(typeof hash, 'string')
+          storage.delete(hash)
+        }
+      },
+      log: () => {
+        // TODO: Test logs
+      },
+      sendTransaction (tx) {
+        throw new Error('Should not be called')
+      }
+    })
 
-  await stuckTransactionsCanceller.addPending(tx)
-  await stuckTransactionsCanceller.removeSuccessful(tx)
-  assert.deepStrictEqual(storage, new Map())
+    await stuckTransactionsCanceller.addPending(tx)
+    await stuckTransactionsCanceller.removeSuccessful(tx)
+    assert.deepStrictEqual(storage, new Map())
+  })
 })
 
 test('cancelTx()', async () => {
