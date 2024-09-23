@@ -77,16 +77,27 @@ export class StuckTransactionsCanceller {
     this.#log(`Replacing ${tx.hash}...`)
     this.#log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
     this.#log(`- gasLimit: ${recentGasUsed} -> ${gasLimit}`)
-    const replacementTx = await this.#sendTransaction({
-      to: tx.from,
-      value: 0,
-      nonce: tx.nonce,
-      gasLimit,
-      maxFeePerGas: maxPriorityFeePerGas > recentGasFeeCap
-        ? maxPriorityFeePerGas
-        : recentGasFeeCap,
-      maxPriorityFeePerGas
-    })
+    let replacementTx
+    try {
+      replacementTx = await this.#sendTransaction({
+        to: tx.from,
+        value: 0,
+        nonce: tx.nonce,
+        gasLimit,
+        maxFeePerGas: maxPriorityFeePerGas > recentGasFeeCap
+          ? maxPriorityFeePerGas
+          : recentGasFeeCap,
+        maxPriorityFeePerGas
+      })
+    } catch (err) {
+      if (err.code === 'NONCE_EXPIRED') {
+        this.#log(`${tx.hash} has already been confirmed`)
+        await this.#store.remove(tx.hash)
+        return
+      } else {
+        throw err
+      }
+    }
     this.#log(`
       Waiting for receipt of replacing ${tx.hash} with ${replacementTx.hash}...`
     )
