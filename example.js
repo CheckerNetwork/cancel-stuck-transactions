@@ -49,6 +49,6 @@ console.log({
   maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
   maxFeePerGas: tx.maxFeePerGas
 })
-await stuckTransactionsCanceller.pending(tx)
+await stuckTransactionsCanceller.addPending(tx)
 await stuckTransactionsCanceller.olderThan(0)
 await stuckTransactionsCanceller.olderThan(0)

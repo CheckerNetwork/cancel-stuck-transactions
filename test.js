@@ -49,7 +49,7 @@ test('StuckTransactionsCanceller', async () => {
       }
     }
   })
-  await stuckTransactionsCanceller.pending(tx)
+  await stuckTransactionsCanceller.addPending(tx)
   assert(storage.has(tx.hash))
   const storedTxClone = { ...storage.get(tx.hash) }
   assert(storedTxClone.timestamp)
@@ -81,7 +81,7 @@ test('StuckTransactionsCanceller', async () => {
   })
   assert.deepStrictEqual(storage, new Map())
 
-  await stuckTransactionsCanceller.pending(tx)
+  await stuckTransactionsCanceller.addPending(tx)
   await stuckTransactionsCanceller.successful(tx)
   assert.deepStrictEqual(storage, new Map())
 })

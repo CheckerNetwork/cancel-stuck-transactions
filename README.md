@@ -49,8 +49,8 @@ const stuckTransactionsCanceller = new StuckTransactionsCanceller({
 // Create a transaction somehow
 const tx = await ethers.createTransaction(/* ... */)
 
-// After you create a transactions, set it as pending
-stuckTransactionsCanceller.pending(tx)
+// After you create a transactions, add it as pending
+stuckTransactionsCanceller.addPending(tx)
 
 // Start waiting for confirmations
 await tx.wait()
@@ -78,7 +78,7 @@ Options:
 - `log`: `str -> null`
 - `sendTransactions`: `(tx) -> Promise<tx>`
 
-### `#pending(tx) -> Promise`
+### `#addPending(tx) -> Promise`
 
 Mark `tx` as pending.
 

@@ -17,7 +17,7 @@ export class StuckTransactionsCanceller {
     this.#sendTransaction = sendTransaction
   }
 
-  async pending (tx) {
+  async addPending (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
     assert.strictEqual(typeof tx.from, 'string')
     assert.strictEqual(typeof tx.maxPriorityFeePerGas, 'bigint')
