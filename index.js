@@ -1,6 +1,32 @@
 import assert from 'node:assert'
 import ms from 'ms'
 
+export const cancelTx = ({
+  tx,
+  recentGasUsed,
+  recentGasFeeCap,
+  log,
+  sendTransaction
+}) => {
+  // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
+  const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
+  const gasLimit = Math.ceil(recentGasUsed * 1.1)
+
+  log(`Replacing ${tx.hash}...`)
+  log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
+  log(`- gasLimit: ${recentGasUsed} -> ${gasLimit}`)
+  return sendTransaction({
+    to: tx.from,
+    value: 0,
+    nonce: tx.nonce,
+    gasLimit,
+    maxFeePerGas: maxPriorityFeePerGas > recentGasFeeCap
+      ? maxPriorityFeePerGas
+      : recentGasFeeCap,
+    maxPriorityFeePerGas
+  })
+}
+
 export class StuckTransactionsCanceller {
   #store
   #log
@@ -70,24 +96,14 @@ export class StuckTransactionsCanceller {
   }
 
   async #cancelTx ({ tx, recentGasUsed, recentGasFeeCap }) {
-    // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
-    const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
-    const gasLimit = Math.ceil(recentGasUsed * 1.1)
-
-    this.#log(`Replacing ${tx.hash}...`)
-    this.#log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
-    this.#log(`- gasLimit: ${recentGasUsed} -> ${gasLimit}`)
     let replacementTx
     try {
-      replacementTx = await this.#sendTransaction({
-        to: tx.from,
-        value: 0,
-        nonce: tx.nonce,
-        gasLimit,
-        maxFeePerGas: maxPriorityFeePerGas > recentGasFeeCap
-          ? maxPriorityFeePerGas
-          : recentGasFeeCap,
-        maxPriorityFeePerGas
+      replacementTx = await cancelTx({
+        tx,
+        recentGasUsed,
+        recentGasFeeCap,
+        log: str => this.#log(str),
+        sendTransaction: tx => this.#sendTransaction(tx)
       })
     } catch (err) {
       if (err.code === 'NONCE_EXPIRED') {

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import timers from 'node:timers/promises'
-import { StuckTransactionsCanceller } from './index.js'
+import { StuckTransactionsCanceller, cancelTx } from './index.js'
 
 test('StuckTransactionsCanceller', async () => {
   const tx = {
@@ -84,4 +84,33 @@ test('StuckTransactionsCanceller', async () => {
   await stuckTransactionsCanceller.addPending(tx)
   await stuckTransactionsCanceller.removeSuccessful(tx)
   assert.deepStrictEqual(storage, new Map())
+})
+
+test('cancelTx()', async () => {
+  const sentTransactions = []
+  const replacementTx = {}
+  const replacementTxReturn = await cancelTx({
+    tx: {
+      hash: 'hash',
+      maxPriorityFeePerGas: 10n,
+      nonce: 20,
+      from: '0x0'
+    },
+    recentGasUsed: 1,
+    recentGasFeeCap: 11n,
+    log: () => {},
+    sendTransaction (tx) {
+      sentTransactions.push(tx)
+      return replacementTx
+    }
+  })
+  assert.strictEqual(replacementTxReturn, replacementTx)
+  assert.deepStrictEqual(sentTransactions, [{
+    gasLimit: 2,
+    maxFeePerGas: 13n,
+    maxPriorityFeePerGas: 13n,
+    nonce: 20,
+    to: '0x0',
+    value: 0
+  }])
 })

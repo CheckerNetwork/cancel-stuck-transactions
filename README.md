@@ -69,14 +69,18 @@ npm install cancel-stuck-transactions
 
 ### `StuckTransactionsCanceller({ store, log, sendTransaction })`
 
+```js
+import { StuckTransactionsCanceller } from 'cancel-stuck-transactions'
+```
+
 Options:
 
 - `store`:
   - `store.add`: `({ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }) -> Promise`
-  - `store.list`: `() -> Promise<{ hash, timestamp, from, gasPremium, nonce }[]>`
-  - `store.remove`: `(hash) -> Promise`
-- `log`: `str -> null`
-- `sendTransactions`: `(tx) -> Promise<tx>`
+  - `store.list`: `() -> Promise<{ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }[]>`
+  - `store.remove`: `(hash: string) -> Promise`
+- `log`: `(string) -> null`
+- `sendTransactions`: `(Transaction) -> Promise<Transaction>`
 
 ### `#addPending(tx) -> Promise`
 
@@ -93,3 +97,19 @@ Remove `tx` because it is successful.
 ### `#cancelOlderThan(ms) -> Promise`
 
 Cancel transactions older than `ms`.
+
+### `cancelTx({ tx, recentGasUsed, recentGasFeeCap, log, sendTransaction }) -> Promise<tx>`
+
+```js
+import { cancelTx } from 'cancel-stuck-transactions'
+```
+
+Helper method that manually cancels transaction `tx`.
+
+Options:
+
+- `tx`: `ethers.Transaction`
+- `recentGasUsed`: `number`
+- `recentGasFeeCap`: `bigint`
+- `log`: `(str: string) -> null`
+- `sendTransactions`: `(Transaction) -> Promise<Transaction>`
