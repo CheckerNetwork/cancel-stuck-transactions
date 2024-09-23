@@ -13,28 +13,30 @@ test('StuckTransactionsCanceller', async () => {
   const storage = new Map()
   const sentTransactions = []
   const stuckTransactionsCanceller = new StuckTransactionsCanceller({
-    store ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
-      assert(!storage.has(hash))
-      assert.strictEqual(typeof hash, 'string')
-      assert.strictEqual(typeof timestamp, 'string')
-      assert.strictEqual(typeof from, 'string')
-      assert.strictEqual(typeof maxPriorityFeePerGas, 'bigint')
-      assert.strictEqual(typeof nonce, 'number')
-      storage.set(hash, {
-        hash,
-        timestamp,
-        from,
-        maxPriorityFeePerGas,
-        nonce
-      })
-    },
-    list () {
-      return [...storage.values()]
-    },
-    resolve (hash) {
-      assert(storage.has(hash))
-      assert.strictEqual(typeof hash, 'string')
-      storage.delete(hash)
+    store: {
+      add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        assert(!storage.has(hash))
+        assert.strictEqual(typeof hash, 'string')
+        assert.strictEqual(typeof timestamp, 'string')
+        assert.strictEqual(typeof from, 'string')
+        assert.strictEqual(typeof maxPriorityFeePerGas, 'bigint')
+        assert.strictEqual(typeof nonce, 'number')
+        storage.set(hash, {
+          hash,
+          timestamp,
+          from,
+          maxPriorityFeePerGas,
+          nonce
+        })
+      },
+      list () {
+        return [...storage.values()]
+      },
+      remove (hash) {
+        assert(storage.has(hash))
+        assert.strictEqual(typeof hash, 'string')
+        storage.delete(hash)
+      }
     },
     log: () => {
       // TODO: Test logs

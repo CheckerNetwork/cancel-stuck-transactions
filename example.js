@@ -13,20 +13,22 @@ const signer = ethers.Wallet.fromPhrase(WALLET_SEED).connect(provider)
 
 const storage = new Map()
 const stuckTransactionsCanceller = new StuckTransactionsCanceller({
-  store ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
-    storage.set(hash, {
-      hash,
-      timestamp,
-      from,
-      maxPriorityFeePerGas,
-      nonce
-    })
-  },
-  list () {
-    return [...storage.values()]
-  },
-  resolve (hash) {
-    storage.delete(hash)
+  store: {
+    save ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+      storage.set(hash, {
+        hash,
+        timestamp,
+        from,
+        maxPriorityFeePerGas,
+        nonce
+      })
+    },
+    list () {
+      return [...storage.values()]
+    },
+    remove (hash) {
+      storage.delete(hash)
+    }
   },
   log (str) {
     console.log(str)

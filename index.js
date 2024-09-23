@@ -3,14 +3,16 @@ import ms from 'ms'
 
 export class StuckTransactionsCanceller {
   #store
-  #list
-  #resolve
   #log
   #sendTransaction
-  constructor ({ store, list, resolve, log, sendTransaction }) {
+  constructor ({ store, log, sendTransaction }) {
+    assert(store, '.store required')
+    assert(store.add, '.store.add required')
+    assert(store.list, '.store.list required')
+    assert(store.remove, '.store.remove required')
+    assert(log, '.log required')
+    assert(sendTransaction, '.sendTransaction required')
     this.#store = store
-    this.#list = list
-    this.#resolve = resolve
     this.#log = log
     this.#sendTransaction = sendTransaction
   }
@@ -20,7 +22,7 @@ export class StuckTransactionsCanceller {
     assert.strictEqual(typeof tx.from, 'string')
     assert.strictEqual(typeof tx.maxPriorityFeePerGas, 'bigint')
     assert.strictEqual(typeof tx.nonce, 'number')
-    await this.#store({
+    await this.#store.add({
       ...tx,
       timestamp: new Date().toISOString()
     })
@@ -28,14 +30,14 @@ export class StuckTransactionsCanceller {
 
   async successful (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
-    await this.#resolve(tx.hash)
+    await this.#store.remove(tx.hash)
   }
 
   async olderThan (ageMs) {
     assert.strictEqual(typeof ageMs, 'number')
 
     this.#log('Checking for stuck transactions...')
-    const txs = await this.#list()
+    const txs = await this.#store.list()
     const txsToCancel = txs.filter(tx => {
       return new Date() - new Date(tx.timestamp) > ageMs
     })
@@ -89,7 +91,7 @@ export class StuckTransactionsCanceller {
       Waiting for receipt of replacing ${tx.hash} with ${replacementTx.hash}...`
     )
     await replacementTx.wait()
-    await this.#resolve(tx.hash)
+    await this.#store.remove(tx.hash)
     this.#log(`Replaced ${tx.hash} with ${replacementTx.hash}`)
   }
 

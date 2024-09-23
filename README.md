@@ -12,26 +12,26 @@ import fs from 'node:fs/promises'
 const stuckTransactionsCanceller = new StuckTransactionsCanceller({
   // Pass a storage adapter, so that pending cancellations are persisted across
   // process restarts
-  async store ({ hash, timestamp, from, gasPremium, nonce }) {
-    await fs.writeFile(
-      `transactions/${hash}`,
-      JSON.stringify({ hash, timestamp, from, gasPremium, nonce })
-    )
+  store: {
+    async add ({ hash, timestamp, from, gasPremium, nonce }) {
+      await fs.writeFile(
+        `transactions/${hash}`,
+        JSON.stringify({ hash, timestamp, from, gasPremium, nonce })
+      )
+    },
+    async list () {
+      const cids = await fs.readdir('transactions')
+      return Promise.all(cids.map(async cid => {
+        return JSON.parse(await fs.readFile(`transactions/${cid}`))
+      }))
+    },
+    async remove (hash) {
+      await fs.unlink(`transactions/${hash}`)
+    },
   },
-  async list () {
-    const cids = await fs.readdir('transactions')
-    return Promise.all(cids.map(async cid => {
-      return JSON.parse(await fs.readFile(`transactions/${cid}`))
-    }))
-  },
-  async resolve (hash) {
-    await fs.unlink(`transactions/${hash}`)
-  },
-
   log (str) {
     console.log(str)
   },
-
   // Pass to an ethers signer for sending replacement transactions
   sendTransaction (tx) {
     return signer.sendTransaction(tx)
@@ -67,13 +67,14 @@ npm install cancel-stuck-transactions
 
 ## API
 
-### `StuckTransactionsCanceller({ store, list, resolve, log, sendTransaction })`
+### `StuckTransactionsCanceller({ store, log, sendTransaction })`
 
 Options:
 
-- `store`: `({ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }) -> Promise`
-- `list`: `() -> Promise<{ hash, timestamp, from, gasPremium, nonce }[]>`
-- `resolve`: `(hash) -> Promise`
+- `store`:
+  - `store.add`: `({ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }) -> Promise`
+  - `store.list`: `() -> Promise<{ hash, timestamp, from, gasPremium, nonce }[]>`
+  - `store.remove`: `(hash) -> Promise`
 - `log`: `str -> null`
 - `sendTransactions`: `(tx) -> Promise<tx>`
 
