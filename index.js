@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import ms from 'ms'
 
-export class CancelStuckTransactions {
+export class StuckTransactionsCanceller {
   #store
   #list
   #resolve

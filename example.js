@@ -1,4 +1,4 @@
-import { CancelStuckTransactions } from './index.js'
+import { StuckTransactionsCanceller } from './index.js'
 import { ethers } from 'ethers'
 import assert from 'node:assert'
 
@@ -12,7 +12,7 @@ const provider = new ethers.JsonRpcProvider(
 const signer = ethers.Wallet.fromPhrase(WALLET_SEED).connect(provider)
 
 const storage = new Map()
-const cancelStuckTransactions = new CancelStuckTransactions({
+const stuckTransactionsCanceller = new StuckTransactionsCanceller({
   store ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
     storage.set(hash, {
       hash,
@@ -47,6 +47,6 @@ console.log({
   maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
   maxFeePerGas: tx.maxFeePerGas
 })
-await cancelStuckTransactions.pending(tx)
-await cancelStuckTransactions.olderThan(0)
-await cancelStuckTransactions.olderThan(0)
+await stuckTransactionsCanceller.pending(tx)
+await stuckTransactionsCanceller.olderThan(0)
+await stuckTransactionsCanceller.olderThan(0)

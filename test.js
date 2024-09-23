@@ -1,9 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import timers from 'node:timers/promises'
-import { CancelStuckTransactions } from './index.js'
+import { StuckTransactionsCanceller } from './index.js'
 
-test('CancelStuckTransactions', async () => {
+test('StuckTransactionsCanceller', async () => {
   const tx = {
     hash: 'hash',
     maxPriorityFeePerGas: 10n,
@@ -12,7 +12,7 @@ test('CancelStuckTransactions', async () => {
   }
   const storage = new Map()
   const sentTransactions = []
-  const cancelStuckTransactions = new CancelStuckTransactions({
+  const stuckTransactionsCanceller = new StuckTransactionsCanceller({
     store ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
       assert(!storage.has(hash))
       assert.strictEqual(typeof hash, 'string')
@@ -47,7 +47,7 @@ test('CancelStuckTransactions', async () => {
       }
     }
   })
-  await cancelStuckTransactions.pending(tx)
+  await stuckTransactionsCanceller.pending(tx)
   assert(storage.has(tx.hash))
   const storedTxClone = { ...storage.get(tx.hash) }
   assert(storedTxClone.timestamp)
@@ -59,12 +59,12 @@ test('CancelStuckTransactions', async () => {
     nonce: tx.nonce
   })
 
-  await cancelStuckTransactions.olderThan(1e10)
+  await stuckTransactionsCanceller.olderThan(1e10)
   assert.deepStrictEqual(sentTransactions, [])
   assert(storage.has(tx.hash))
 
   await timers.setImmediate()
-  await cancelStuckTransactions.olderThan(0)
+  await stuckTransactionsCanceller.olderThan(0)
   assert.strictEqual(sentTransactions.length, 1)
   const sentTransactionClone = { ...sentTransactions[0] }
   assert(sentTransactionClone.gasLimit)
@@ -79,7 +79,7 @@ test('CancelStuckTransactions', async () => {
   })
   assert.deepStrictEqual(storage, new Map())
 
-  await cancelStuckTransactions.pending(tx)
-  await cancelStuckTransactions.successful(tx)
+  await stuckTransactionsCanceller.pending(tx)
+  await stuckTransactionsCanceller.successful(tx)
   assert.deepStrictEqual(storage, new Map())
 })

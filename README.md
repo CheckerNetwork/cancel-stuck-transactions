@@ -5,11 +5,11 @@ Cancel stuck transactions on the Filecoin network.
 ## Usage
 
 ```js
-import { CancelStuckTransactions } from 'cancel-stuck-transactions'
+import { StuckTransactionsCanceller } from 'cancel-stuck-transactions'
 import timers from 'node:timers/promises'
 import fs from 'node:fs/promises'
 
-const cancelStuckTransactions = new CancelStuckTransactions({
+const stuckTransactionsCanceller = new StuckTransactionsCanceller({
   // Pass a storage adapter, so that pending cancellations are persisted across
   // process restarts
   async store ({ hash, timestamp, from, gasPremium, nonce }) {
@@ -41,7 +41,7 @@ const cancelStuckTransactions = new CancelStuckTransactions({
 // Start the cancel transactions loop
 ;(async () => {
   while (true) {
-    await cancelStuckTransactions.olderThan(TEN_MINUTES)
+    await stuckTransactionsCanceller.olderThan(TEN_MINUTES)
     await timers.setTimeout(ONE_MINUTE)
   }
 })()
@@ -50,13 +50,13 @@ const cancelStuckTransactions = new CancelStuckTransactions({
 const tx = await ethers.createTransaction(/* ... */)
 
 // After you create a transactions, set it as pending
-cancelStuckTransactions.pending(tx)
+stuckTransactionsCanceller.pending(tx)
 
 // Start waiting for confirmations
 await tx.wait()
 
 // Once confirmed, set it as successful
-await cancelStuckTransactions.successful(tx)
+await stuckTransactionsCanceller.successful(tx)
 ```
 
 ## Installation
@@ -67,7 +67,7 @@ npm install cancel-stuck-transactions
 
 ## API
 
-### `CancelStuckTransactions({ store, list, resolve, log, sendTransaction })`
+### `StuckTransactionsCanceller({ store, list, resolve, log, sendTransaction })`
 
 Options:
 
