@@ -55,8 +55,8 @@ stuckTransactionsCanceller.addPending(tx)
 // Start waiting for confirmations
 await tx.wait()
 
-// Once confirmed, set it as successful
-await stuckTransactionsCanceller.successful(tx)
+// Once confirmed, remove it
+await stuckTransactionsCanceller.removeSuccessful(tx)
 ```
 
 ## Installation
@@ -80,15 +80,15 @@ Options:
 
 ### `#addPending(tx) -> Promise`
 
-Mark `tx` as pending.
+Add `tx` as pending.
 
 `tx` should be a
 [Transaction](https://docs.ethers.org/v6/api/transaction/#Transaction) object
 from ethers.js.
 
-### `#successful(tx) -> Promise`
+### `#removeSuccessful(tx) -> Promise`
 
-Mark `tx` as successful.
+Remove `tx` because it is successful.
 
 ### `#olderThan(ms) -> Promise`
 

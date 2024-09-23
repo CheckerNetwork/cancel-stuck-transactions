@@ -82,6 +82,6 @@ test('StuckTransactionsCanceller', async () => {
   assert.deepStrictEqual(storage, new Map())
 
   await stuckTransactionsCanceller.addPending(tx)
-  await stuckTransactionsCanceller.successful(tx)
+  await stuckTransactionsCanceller.removeSuccessful(tx)
   assert.deepStrictEqual(storage, new Map())
 })

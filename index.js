@@ -28,7 +28,7 @@ export class StuckTransactionsCanceller {
     })
   }
 
-  async successful (tx) {
+  async removeSuccessful (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
     await this.#store.remove(tx.hash)
   }
