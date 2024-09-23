@@ -49,7 +49,7 @@ export class StuckTransactionsCanceller {
     this.#log('Transactions to cancel:')
     for (const tx of txsToCancel) {
       this.#log(
-        `- ${tx.hash} (age ${ms(new Date() - new Date(tx.timestamp))})`
+        `- ${tx.hash} (nonce=${tx.nonce} age=${ms(new Date() - new Date(tx.timestamp))})`
       )
     }
 
