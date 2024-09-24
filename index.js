@@ -107,7 +107,7 @@ export class StuckTransactionsCanceller {
       ')'
     )
 
-    await Promise.all(txsToCancel.map(tx => this.#cancelTx({
+    return Promise.allSettled(txsToCancel.map(tx => this.#cancelTx({
       tx,
       recentGasUsed: recentSendMessage.receipt.gasUsed,
       recentGasFeeCap: Number(recentSendMessage.gasFeeCap)

@@ -96,7 +96,8 @@ test('StuckTransactionsCanceller', async t => {
         }
       })
       await stuckTransactionsCanceller.addPending(tx)
-      await stuckTransactionsCanceller.cancelOlderThan(1e10)
+      const status = await stuckTransactionsCanceller.cancelOlderThan(1e10)
+      assert.strictEqual(status, undefined)
       assert.deepStrictEqual(sentTransactions, [])
       assert(storage.has(tx.hash))
     })
@@ -144,7 +145,11 @@ test('StuckTransactionsCanceller', async t => {
     })
     await stuckTransactionsCanceller.addPending(tx)
     await timers.setImmediate()
-    await stuckTransactionsCanceller.cancelOlderThan(0)
+    const status = await stuckTransactionsCanceller.cancelOlderThan(0)
+    assert.deepStrictEqual(status, [{
+      status: 'fulfilled',
+      value: undefined
+    }])
     assert.strictEqual(sentTransactions.length, 1)
     const sentTransactionClone = { ...sentTransactions[0] }
     assert(sentTransactionClone.gasLimit)

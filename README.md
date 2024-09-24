@@ -94,9 +94,11 @@ from ethers.js.
 
 Remove `tx` because it is successful.
 
-### `#cancelOlderThan(ms) -> Promise`
+### `#cancelOlderThan(ms) -> Promise<{status,value,reason}[]?>`
 
-Cancel transactions older than `ms`.
+Cancel transactions older than `ms`. Returns the return value of
+[`Promise.allSettled()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled)
+for all performed cancellations.
 
 ### `cancelTx({ tx, recentGasUsed, recentGasFeeCap, log, sendTransaction }) -> Promise<tx>`
 
