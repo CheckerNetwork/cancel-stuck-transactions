@@ -164,7 +164,7 @@ test('StuckTransactionsCanceller', async t => {
     })
     assert.deepStrictEqual(storage, new Map())
   })
-  await t.test('#removeSuccessful()', async t => {
+  await t.test('#removeConfirmed()', async t => {
     const tx = {
       hash: 'hash',
       maxPriorityFeePerGas: 10n,
@@ -202,7 +202,7 @@ test('StuckTransactionsCanceller', async t => {
     })
 
     await stuckTransactionsCanceller.addPending(tx)
-    await stuckTransactionsCanceller.removeSuccessful(tx)
+    await stuckTransactionsCanceller.removeConfirmed(tx)
     assert.deepStrictEqual(storage, new Map())
   })
 })
