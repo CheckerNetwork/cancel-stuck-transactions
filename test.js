@@ -6,6 +6,9 @@ import {
   cancelTx,
   getRecentSendMessage
 } from './index.js'
+import createDebug from 'debug'
+
+const debug = createDebug('test')
 
 test('StuckTransactionsCanceller', async t => {
   await t.test('#addPending()', async () => {
@@ -40,8 +43,9 @@ test('StuckTransactionsCanceller', async t => {
           throw new Error('Should not be called')
         }
       },
-      log: () => {
+      log: str => {
         // TODO: Test logs
+        debug(str)
       },
       sendTransaction () {
         throw new Error('Should not be called')
@@ -88,8 +92,9 @@ test('StuckTransactionsCanceller', async t => {
             throw new Error('Should not be called')
           }
         },
-        log: () => {
+        log: str => {
           // TODO: Test logs
+          debug(str)
         },
         sendTransaction (tx) {
           throw new Error('Should not be called')
@@ -132,8 +137,9 @@ test('StuckTransactionsCanceller', async t => {
           storage.delete(hash)
         }
       },
-      log: () => {
+      log: str => {
         // TODO: Test logs
+        debug(str)
       },
       sendTransaction (tx) {
         sentTransactions.push(tx)
@@ -193,8 +199,9 @@ test('StuckTransactionsCanceller', async t => {
           storage.delete(hash)
         }
       },
-      log: () => {
+      log: str => {
         // TODO: Test logs
+        debug(str)
       },
       sendTransaction (tx) {
         throw new Error('Should not be called')
