@@ -52,7 +52,7 @@ export class StuckTransactionsCanceller {
   #sendTransaction
   constructor ({ store, log, sendTransaction }) {
     assert(store, '.store required')
-    assert(store.add, '.store.add required')
+    assert(store.set, '.store.set required')
     assert(store.list, '.store.list required')
     assert(store.remove, '.store.remove required')
     assert(log, '.log required')
@@ -67,7 +67,7 @@ export class StuckTransactionsCanceller {
     assert.strictEqual(typeof tx.from, 'string')
     assert.strictEqual(typeof tx.maxPriorityFeePerGas, 'bigint')
     assert.strictEqual(typeof tx.nonce, 'number')
-    await this.#store.add({
+    await this.#store.set({
       ...tx,
       timestamp: new Date().toISOString()
     })

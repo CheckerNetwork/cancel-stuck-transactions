@@ -21,7 +21,7 @@ test('StuckTransactionsCanceller', async t => {
     const storage = new Map()
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
           assert(!storage.has(hash))
           assert.strictEqual(typeof hash, 'string')
           assert.strictEqual(typeof timestamp, 'string')
@@ -75,7 +75,7 @@ test('StuckTransactionsCanceller', async t => {
       const sentTransactions = []
       const stuckTransactionsCanceller = new StuckTransactionsCanceller({
         store: {
-          add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+          set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
             assert(!storage.has(hash))
             storage.set(hash, {
               hash,
@@ -118,7 +118,7 @@ test('StuckTransactionsCanceller', async t => {
     const sentTransactions = []
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
           assert(!storage.has(hash))
           storage.set(hash, {
             hash,
@@ -180,7 +180,7 @@ test('StuckTransactionsCanceller', async t => {
     const storage = new Map()
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        add ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
           assert(!storage.has(hash))
           storage.set(hash, {
             hash,

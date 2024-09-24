@@ -13,7 +13,7 @@ const stuckTransactionsCanceller = new StuckTransactionsCanceller({
   // Pass a storage adapter, so that pending cancellations are persisted across
   // process restarts
   store: {
-    async add ({ hash, timestamp, from, gasPremium, nonce }) {
+    async set ({ hash, timestamp, from, gasPremium, nonce }) {
       await fs.writeFile(
         `transactions/${hash}`,
         JSON.stringify({ hash, timestamp, from, gasPremium, nonce })
@@ -76,7 +76,7 @@ import { StuckTransactionsCanceller } from 'cancel-stuck-transactions'
 Options:
 
 - `store`:
-  - `store.add`: `({ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }) -> Promise`
+  - `store.set`: `({ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }) -> Promise`
   - `store.list`: `() -> Promise<{ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }[]>`
   - `store.remove`: `(hash: string) -> Promise`
 - `log`: `(string) -> null`
