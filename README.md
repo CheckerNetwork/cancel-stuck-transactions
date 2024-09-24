@@ -80,7 +80,7 @@ Options:
   - `store.list`: `() -> Promise<{ hash: string, timestamp: string, from: string, maxPriorityFeePerGas: bigint, nonce: number }[]>`
   - `store.remove`: `(hash: string) -> Promise`
 - `log`: `(string) -> null`
-- `sendTransactions`: `(Transaction) -> Promise<Transaction>`
+- `sendTransaction`: `(Transaction) -> Promise<Transaction>`
 
 ### `#addPending(tx) -> Promise`
 
@@ -114,7 +114,7 @@ Options:
 - `recentGasUsed`: `number`
 - `recentGasFeeCap`: `bigint`
 - `log`: `(str: string) -> null`
-- `sendTransactions`: `(Transaction) -> Promise<Transaction>`
+- `sendTransaction`: `(Transaction) -> Promise<Transaction>`
 
 Throws:
 - `err.code === 'NONCE_EXPIRED'`: The transaction can't be replaced because
