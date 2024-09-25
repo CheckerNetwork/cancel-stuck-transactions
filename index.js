@@ -30,7 +30,9 @@ export const cancelTx = ({
 export const getRecentSendMessage = async () => {
   let res = await fetch('https://filfox.info/api/v1/message/list?method=Send')
   if (!res.ok) {
-    throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
+    const err = new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
+    err.code = 'FILFOX_REQUEST_FAILED'
+    throw err
   }
   const body = await res.json()
   assert(body.messages.length > 0, '/message/list returned an empty list')

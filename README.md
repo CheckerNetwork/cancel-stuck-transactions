@@ -100,6 +100,11 @@ Cancel transactions older than `ms`. Returns the return value of
 [`Promise.allSettled()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled)
 for all performed cancellations.
 
+Throws:
+- _See `cancelTx()`_
+- _See `getRecentSendMessage()`_
+- _potentially more_
+
 ### `cancelTx({ tx, recentGasUsed, recentGasFeeCap, log, sendTransaction }) -> Promise<tx>`
 
 ```js
@@ -135,3 +140,8 @@ Helper method that fetches a recent `SendMessage`.
 - `receipt`: `object`
   -  `gasUsed`: `number`
 - `gasFeeCap`: `string`
+
+Throws:
+- `err.code === 'FILFOX_REQUEST_FAILED'`: This method relies on `filfox.info`.
+Requests may fail at any point
+- _potentially more_
