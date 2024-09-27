@@ -140,6 +140,7 @@ Helper method that fetches a recent `SendMessage`.
 - `receipt`: `object`
   -  `gasUsed`: `number`
 - `gasFeeCap`: `string`
+- `gasLimit`: `number`
 
 Throws:
 - `err.code === 'FILFOX_REQUEST_FAILED'`: This method relies on `filfox.info`.
