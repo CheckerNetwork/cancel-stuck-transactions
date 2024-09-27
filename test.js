@@ -224,7 +224,7 @@ test('cancelTx()', async () => {
       nonce: 20,
       from: '0x0'
     },
-    recentGasUsed: 1,
+    recentGasLimit: 1,
     recentGasFeeCap: 11n,
     log: () => {},
     sendTransaction (tx) {
