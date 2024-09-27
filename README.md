@@ -105,7 +105,7 @@ Throws:
 - _See `getRecentSendMessage()`_
 - _potentially more_
 
-### `cancelTx({ tx, recentGasUsed, recentGasFeeCap, log, sendTransaction }) -> Promise<tx>`
+### `cancelTx({ tx, recentGasLimit, recentGasFeeCap, log, sendTransaction }) -> Promise<tx>`
 
 ```js
 import { cancelTx } from 'cancel-stuck-transactions'
@@ -116,7 +116,7 @@ Helper method that manually cancels transaction `tx`.
 Options:
 
 - `tx`: `ethers.Transaction`
-- `recentGasUsed`: `number`
+- `recentGasLimit`: `number`
 - `recentGasFeeCap`: `bigint`
 - `log`: `(str: string) -> null`
 - `sendTransaction`: `(Transaction) -> Promise<Transaction>`

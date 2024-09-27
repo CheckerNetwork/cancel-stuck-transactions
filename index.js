@@ -3,18 +3,18 @@ import ms from 'ms'
 
 export const cancelTx = ({
   tx,
-  recentGasUsed,
+  recentGasLimit,
   recentGasFeeCap,
   log,
   sendTransaction
 }) => {
   // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
   const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
-  const gasLimit = Math.ceil(recentGasUsed * 1.1)
+  const gasLimit = Math.ceil(recentGasLimit * 1.1)
 
   log(`Replacing ${tx.hash}...`)
   log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
-  log(`- gasLimit: ${recentGasUsed} -> ${gasLimit}`)
+  log(`- gasLimit: ${recentGasLimit} -> ${gasLimit}`)
   return sendTransaction({
     to: tx.from,
     value: 0,
@@ -111,17 +111,17 @@ export class StuckTransactionsCanceller {
 
     return Promise.allSettled(txsToCancel.map(tx => this.#cancelTx({
       tx,
-      recentGasUsed: recentSendMessage.receipt.gasUsed,
+      recentGasLimit: recentSendMessage.gasLimit,
       recentGasFeeCap: Number(recentSendMessage.gasFeeCap)
     })))
   }
 
-  async #cancelTx ({ tx, recentGasUsed, recentGasFeeCap }) {
+  async #cancelTx ({ tx, recentGasLimit, recentGasFeeCap }) {
     let replacementTx
     try {
       replacementTx = await cancelTx({
         tx,
-        recentGasUsed,
+        recentGasLimit,
         recentGasFeeCap,
         log: str => this.#log(str),
         sendTransaction: tx => this.#sendTransaction(tx)
