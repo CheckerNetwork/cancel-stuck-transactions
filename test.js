@@ -15,24 +15,27 @@ test('StuckTransactionsCanceller', async t => {
     const tx = {
       hash: 'hash',
       maxPriorityFeePerGas: 10n,
+      gasLimit: 1n,
       nonce: 20,
       from: '0x0'
     }
     const storage = new Map()
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, gasLimit, nonce }) {
           assert(!storage.has(hash))
           assert.strictEqual(typeof hash, 'string')
           assert.strictEqual(typeof timestamp, 'string')
           assert.strictEqual(typeof from, 'string')
           assert.strictEqual(typeof maxPriorityFeePerGas, 'bigint')
+          assert.strictEqual(typeof gasLimit, 'bigint')
           assert.strictEqual(typeof nonce, 'number')
           storage.set(hash, {
             hash,
             timestamp,
             from,
             maxPriorityFeePerGas,
+            gasLimit,
             nonce
           })
         },
@@ -60,6 +63,7 @@ test('StuckTransactionsCanceller', async t => {
       hash: tx.hash,
       from: tx.from,
       maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+      gasLimit: tx.gasLimit,
       nonce: tx.nonce
     })
   })
@@ -68,6 +72,7 @@ test('StuckTransactionsCanceller', async t => {
       const tx = {
         hash: 'hash',
         maxPriorityFeePerGas: 10n,
+        gasLimit: 1n,
         nonce: 20,
         from: '0x0'
       }
@@ -75,13 +80,14 @@ test('StuckTransactionsCanceller', async t => {
       const sentTransactions = []
       const stuckTransactionsCanceller = new StuckTransactionsCanceller({
         store: {
-          set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+          set ({ hash, timestamp, from, maxPriorityFeePerGas, gasLimit, nonce }) {
             assert(!storage.has(hash))
             storage.set(hash, {
               hash,
               timestamp,
               from,
               maxPriorityFeePerGas,
+              gasLimit,
               nonce
             })
           },
@@ -111,6 +117,7 @@ test('StuckTransactionsCanceller', async t => {
     const tx = {
       hash: 'hash',
       maxPriorityFeePerGas: 10n,
+      gasLimit: 1n,
       nonce: 20,
       from: '0x0'
     }
@@ -118,13 +125,14 @@ test('StuckTransactionsCanceller', async t => {
     const sentTransactions = []
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, gasLimit, nonce }) {
           assert(!storage.has(hash))
           storage.set(hash, {
             hash,
             timestamp,
             from,
             maxPriorityFeePerGas,
+            gasLimit,
             nonce
           })
         },
@@ -158,10 +166,10 @@ test('StuckTransactionsCanceller', async t => {
     }])
     assert.strictEqual(sentTransactions.length, 1)
     const sentTransactionClone = { ...sentTransactions[0] }
-    assert(sentTransactionClone.gasLimit)
     assert(sentTransactionClone.maxFeePerGas)
-    delete sentTransactionClone.gasLimit
+    assert(sentTransactionClone.gasLimit)
     delete sentTransactionClone.maxFeePerGas
+    delete sentTransactionClone.gasLimit
     assert.deepStrictEqual(sentTransactionClone, {
       maxPriorityFeePerGas: 13n,
       nonce: tx.nonce,
@@ -174,19 +182,21 @@ test('StuckTransactionsCanceller', async t => {
     const tx = {
       hash: 'hash',
       maxPriorityFeePerGas: 10n,
+      gasLimit: 1n,
       nonce: 20,
       from: '0x0'
     }
     const storage = new Map()
     const stuckTransactionsCanceller = new StuckTransactionsCanceller({
       store: {
-        set ({ hash, timestamp, from, maxPriorityFeePerGas, nonce }) {
+        set ({ hash, timestamp, from, maxPriorityFeePerGas, gasLimit, nonce }) {
           assert(!storage.has(hash))
           storage.set(hash, {
             hash,
             timestamp,
             from,
             maxPriorityFeePerGas,
+            gasLimit,
             nonce
           })
         },
@@ -221,6 +231,7 @@ test('cancelTx()', async () => {
     tx: {
       hash: 'hash',
       maxPriorityFeePerGas: 10n,
+      gasLimit: 1n,
       nonce: 20,
       from: '0x0'
     },
