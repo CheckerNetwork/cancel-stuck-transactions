@@ -10,11 +10,11 @@ export const cancelTx = ({
 }) => {
   // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
   const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
-  const gasLimit = Math.ceil(recentGasLimit * 1.1)
+  const gasLimit = Math.ceil(Math.max(Number(tx.gasLimit), recentGasLimit) * 1.1)
 
   log(`Replacing ${tx.hash}...`)
   log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
-  log(`- gasLimit: ${recentGasLimit} -> ${gasLimit}`)
+  log(`- gasLimit: ${tx.gasLimit} -> ${gasLimit}`)
   return sendTransaction({
     to: tx.from,
     value: 0,
@@ -68,6 +68,7 @@ export class StuckTransactionsCanceller {
     assert.strictEqual(typeof tx.hash, 'string')
     assert.strictEqual(typeof tx.from, 'string')
     assert.strictEqual(typeof tx.maxPriorityFeePerGas, 'bigint')
+    assert.strictEqual(typeof tx.gasLimit, 'bigint')
     assert.strictEqual(typeof tx.nonce, 'number')
     await this.#store.set({
       ...tx,
