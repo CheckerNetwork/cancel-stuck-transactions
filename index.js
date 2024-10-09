@@ -132,7 +132,7 @@ export class StuckTransactionsCanceller {
     } catch (err) {
       if (err.code === 'NONCE_EXPIRED') {
         this.#log(`${tx.hash} has already been confirmed`)
-        await this.#store.remove(tx.hash)
+        await this.removeConfirmed(tx)
         return
       } else {
         throw err
@@ -143,7 +143,7 @@ export class StuckTransactionsCanceller {
     )
     await replacementTx.wait()
     await this.removeConfirmed(replacementTx)
-    await this.#store.remove(tx.hash)
+    await this.removeConfirmed(tx)
     this.#log(`Replaced ${tx.hash} with ${replacementTx.hash}`)
   }
 }
