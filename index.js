@@ -10,7 +10,7 @@ export const cancelTx = ({
 }) => {
   // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
   const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
-  const gasLimit = Math.ceil(Math.max(Number(tx.gasLimit), recentGasLimit) * 1.1)
+  const gasLimit = BigInt(Math.ceil(Math.max(Number(tx.gasLimit), recentGasLimit) * 1.1))
 
   log(`Replacing ${tx.hash}...`)
   log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)

@@ -245,7 +245,7 @@ test('cancelTx()', async () => {
   })
   assert.strictEqual(replacementTxReturn, replacementTx)
   assert.deepStrictEqual(sentTransactions, [{
-    gasLimit: 2,
+    gasLimit: 2n,
     maxFeePerGas: 13n,
     maxPriorityFeePerGas: 13n,
     nonce: 20,
