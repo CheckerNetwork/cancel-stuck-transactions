@@ -241,11 +241,10 @@ test('StuckTransactionsCanceller', async t => {
       await Promise.all([
         stuckTransactionsCanceller.cancelOlderThan(0),
         (async () => {
+          // The replacement transaction is "stuck" now
           while (!storage.has(replacementTxs[0].hash)) {
             await timers.setTimeout()
           }
-          // The replacement transaction is "stuck" now
-          assert(storage.has(replacementTxs[0].hash))
           await timers.setTimeout()
           await Promise.all([
             stuckTransactionsCanceller.cancelOlderThan(0),
