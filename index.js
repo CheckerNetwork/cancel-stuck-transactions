@@ -92,9 +92,9 @@ export class StuckTransactionsCanceller {
 
     this.#log('Checking for stuck transactions...')
     const txs = await this.#store.list()
-    const txsToCancel = txs.filter(tx => {
-      return new Date() - new Date(tx.timestamp) > ageMs
-    })
+    const txsToCancel = txs
+      .filter(tx => new Date() - new Date(tx.timestamp) > ageMs)
+      .filter(tx => !txs.find(_tx => _tx.nonce === tx.nonce && _tx.gasLimit > tx.gasLimit))
     if (txsToCancel.length === 0) {
       this.#log('No transactions to cancel')
       return
