@@ -222,8 +222,11 @@ test('StuckTransactionsCanceller', async t => {
 
     await stuckTransactionsCanceller.addPending(tx)
     await stuckTransactionsCanceller.addPending({ ...tx, hash: 'replacementTxHash' })
+    await stuckTransactionsCanceller.addPending({ ...tx, hash: 'replacementTxHash2', nonce: 21 })
     await stuckTransactionsCanceller.removeConfirmed(tx)
-    assert.deepStrictEqual(storage, new Map())
+    assert(!storage.has(tx.hash))
+    assert(!storage.has('replacementTxHash'))
+    assert(storage.has('replacementTxHash2'))
   })
 })
 
