@@ -177,8 +177,7 @@ test('StuckTransactionsCanceller', async t => {
         to: tx.from,
         value: 0
       })
-      assert(storage.has('replacementTxHash'))
-      assert(!storage.has(tx.hash))
+      assert.deepStrictEqual(storage, new Map())
     })
   })
   await t.test('#removeConfirmed()', async t => {
