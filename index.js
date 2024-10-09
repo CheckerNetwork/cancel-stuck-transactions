@@ -79,7 +79,12 @@ export class StuckTransactionsCanceller {
 
   async removeConfirmed (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
-    await this.#store.remove(tx.hash)
+    const txs = await this.#store.list()
+    for (const _tx of txs) {
+      if (_tx.nonce === tx.nonce) {
+        await this.#store.remove(_tx.hash)
+      }
+    }
   }
 
   async cancelOlderThan (ageMs) {

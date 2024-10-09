@@ -203,7 +203,7 @@ test('StuckTransactionsCanceller', async t => {
           })
         },
         list () {
-          throw new Error('Should not be called')
+          return [...storage.values()]
         },
         remove (hash) {
           assert(storage.has(hash))
@@ -221,6 +221,7 @@ test('StuckTransactionsCanceller', async t => {
     })
 
     await stuckTransactionsCanceller.addPending(tx)
+    await stuckTransactionsCanceller.addPending({ ...tx, hash: 'replacementTxHash' })
     await stuckTransactionsCanceller.removeConfirmed(tx)
     assert.deepStrictEqual(storage, new Map())
   })
