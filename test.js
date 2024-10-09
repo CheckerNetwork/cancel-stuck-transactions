@@ -7,6 +7,7 @@ import {
   getRecentSendMessage
 } from './index.js'
 import createDebug from 'debug'
+import pDefer from 'p-defer'
 
 const debug = createDebug('test')
 
@@ -178,6 +179,91 @@ test('StuckTransactionsCanceller', async t => {
         value: 0
       })
       assert.deepStrictEqual(storage, new Map())
+    })
+    await t.test('cancel stuck replacement transactions', async t => {
+      const tx = {
+        hash: 'hash',
+        maxPriorityFeePerGas: 10n,
+        gasLimit: 1n,
+        nonce: 20,
+        from: '0x0'
+      }
+      const storage = new Map()
+      const sentTransactions = []
+      const replacementTxs = [
+        {
+          hash: 'replacementTxHash1',
+          deferred: pDefer()
+        }, {
+          hash: 'replacementTxHash2',
+          deferred: pDefer()
+        }
+      ]
+      let replacementTxIndex = 0
+      const stuckTransactionsCanceller = new StuckTransactionsCanceller({
+        store: {
+          set ({ hash, timestamp, from, maxPriorityFeePerGas, gasLimit, nonce }) {
+            assert(!storage.has(hash))
+            storage.set(hash, {
+              hash,
+              timestamp,
+              from,
+              maxPriorityFeePerGas,
+              gasLimit,
+              nonce
+            })
+          },
+          list () {
+            return [...storage.values()]
+          },
+          remove (hash) {
+            assert(storage.has(hash))
+            assert.strictEqual(typeof hash, 'string')
+            storage.delete(hash)
+          }
+        },
+        log: str => {
+          // TODO: Test logs
+          debug(str)
+        },
+        sendTransaction (tx) {
+          sentTransactions.push(tx)
+          const { hash, deferred } = replacementTxs[replacementTxIndex++]
+          return {
+            ...tx,
+            hash,
+            wait: deferred.promise
+          }
+        }
+      })
+      await stuckTransactionsCanceller.addPending(tx)
+      await timers.setTimeout()
+      await Promise.all([
+        stuckTransactionsCanceller.cancelOlderThan(0),
+        (async () => {
+          while (!storage.has(replacementTxs[0].hash)) {
+            await timers.setTimeout()
+          }
+          // The replacement transaction is "stuck" now
+          assert(storage.has(replacementTxs[0].hash))
+          await timers.setTimeout()
+          await Promise.all([
+            stuckTransactionsCanceller.cancelOlderThan(0),
+            (async () => {
+              // The replacement of the replacement transaction is "stuck" now
+              while (!storage.has(replacementTxs[1].hash)) {
+                await timers.setTimeout()
+              }
+              // Finally, the replacement's replacement is the one that succeeds
+              replacementTxs[1].deferred.resolve()
+            })()
+          ])
+        })()
+      ])
+      assert.strictEqual(sentTransactions.length, 2)
+      while (Object.keys(storage).length > 0) {
+        await timers.setTimeout()
+      }
     })
   })
   await t.test('#removeConfirmed()', async t => {
