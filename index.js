@@ -147,7 +147,6 @@ export class StuckTransactionsCanceller {
       `Waiting for receipt of replacing ${tx.hash} with ${replacementTx.hash}...`
     )
     await replacementTx.wait()
-    await this.removeConfirmed(replacementTx)
     await this.removeConfirmed(tx)
     this.#log(`Replaced ${tx.hash} with ${replacementTx.hash}`)
   }
