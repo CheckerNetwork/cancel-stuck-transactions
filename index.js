@@ -16,6 +16,7 @@ export const cancelTx = ({
   log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
   log(`- gasLimit: ${tx.gasLimit} -> ${gasLimit}`)
   return sendTransaction({
+    from: tx.from,
     to: tx.from,
     value: 0,
     nonce: tx.nonce,

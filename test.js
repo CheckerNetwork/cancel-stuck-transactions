@@ -249,6 +249,7 @@ test('cancelTx()', async () => {
     maxFeePerGas: 13n,
     maxPriorityFeePerGas: 13n,
     nonce: 20,
+    from: '0x0',
     to: '0x0',
     value: 0
   }])
