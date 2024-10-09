@@ -127,6 +127,7 @@ export class StuckTransactionsCanceller {
         log: str => this.#log(str),
         sendTransaction: tx => this.#sendTransaction(tx)
       })
+      await this.addPending(replacementTx)
     } catch (err) {
       if (err.code === 'NONCE_EXPIRED') {
         this.#log(`${tx.hash} has already been confirmed`)
