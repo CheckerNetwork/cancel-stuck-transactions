@@ -82,6 +82,7 @@ export class StuckTransactionsCanceller {
     const txs = await this.#store.list()
     for (const _tx of txs) {
       if (_tx.nonce === tx.nonce) {
+        this.#log(`Resolved ${_tx.hash} (confirmed or replaced)`)
         await this.#store.remove(_tx.hash)
       }
     }
