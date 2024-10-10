@@ -96,7 +96,7 @@ export class StuckTransactionsCanceller {
     const txsToCancel = txs
       .filter(tx => new Date() - new Date(tx.timestamp) > ageMs)
       // Ignore transactions that are already being replaced
-      .filter(tx => !txs.find(_tx => _tx.nonce === tx.nonce && _tx.gasLimit > tx.gasLimit))
+      .filter(tx => !txs.some(_tx => _tx.nonce === tx.nonce && _tx.gasLimit > tx.gasLimit))
     if (txsToCancel.length === 0) {
       this.#log('No transactions to cancel')
       return
