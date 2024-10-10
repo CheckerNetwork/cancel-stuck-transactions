@@ -1,6 +1,9 @@
 {
   "name": "cancel-stuck-transactions",
-  "repository": "filecoin-station/cancel-stuck-transactions",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/filecoin-station/cancel-stuck-transactions.git"
+  },
   "description": "Cancel stuck transactions on the Filecoin network",
   "version": "4.0.0",
   "license": "(MIT OR Apache-2.0)",
