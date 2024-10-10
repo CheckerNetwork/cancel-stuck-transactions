@@ -10,12 +10,13 @@ export const cancelTx = ({
 }) => {
   // Increase by 25% + 1 attoFIL (easier: 25.2%) and round up
   const maxPriorityFeePerGas = (tx.maxPriorityFeePerGas * 1252n + 1000n) / 1000n
-  const gasLimit = Math.ceil(Math.max(Number(tx.gasLimit), recentGasLimit) * 1.1)
+  const gasLimit = BigInt(Math.ceil(Math.max(Number(tx.gasLimit), recentGasLimit) * 1.1))
 
   log(`Replacing ${tx.hash}...`)
   log(`- maxPriorityFeePerGas: ${tx.maxPriorityFeePerGas} -> ${maxPriorityFeePerGas}`)
   log(`- gasLimit: ${tx.gasLimit} -> ${gasLimit}`)
   return sendTransaction({
+    from: tx.from,
     to: tx.from,
     value: 0,
     nonce: tx.nonce,
@@ -78,7 +79,13 @@ export class StuckTransactionsCanceller {
 
   async removeConfirmed (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
-    await this.#store.remove(tx.hash)
+    const txs = await this.#store.list()
+    for (const _tx of txs) {
+      if (_tx.nonce === tx.nonce) {
+        this.#log(`Resolved ${_tx.hash} (confirmed or replaced)`)
+        await this.#store.remove(_tx.hash)
+      }
+    }
   }
 
   async cancelOlderThan (ageMs) {
@@ -86,9 +93,10 @@ export class StuckTransactionsCanceller {
 
     this.#log('Checking for stuck transactions...')
     const txs = await this.#store.list()
-    const txsToCancel = txs.filter(tx => {
-      return new Date() - new Date(tx.timestamp) > ageMs
-    })
+    const txsToCancel = txs
+      .filter(tx => new Date() - new Date(tx.timestamp) > ageMs)
+      // Ignore transactions that are already being replaced
+      .filter(tx => !txs.some(_tx => _tx.nonce === tx.nonce && _tx.gasLimit > tx.gasLimit))
     if (txsToCancel.length === 0) {
       this.#log('No transactions to cancel')
       return
@@ -127,20 +135,21 @@ export class StuckTransactionsCanceller {
         log: str => this.#log(str),
         sendTransaction: tx => this.#sendTransaction(tx)
       })
+      await this.addPending(replacementTx)
     } catch (err) {
       if (err.code === 'NONCE_EXPIRED') {
         this.#log(`${tx.hash} has already been confirmed`)
-        await this.#store.remove(tx.hash)
+        await this.removeConfirmed(tx)
         return
       } else {
         throw err
       }
     }
-    this.#log(`
-      Waiting for receipt of replacing ${tx.hash} with ${replacementTx.hash}...`
+    this.#log(
+      `Waiting for receipt of replacing ${tx.hash} with ${replacementTx.hash}...`
     )
     await replacementTx.wait()
-    await this.#store.remove(tx.hash)
+    await this.removeConfirmed(tx)
     this.#log(`Replaced ${tx.hash} with ${replacementTx.hash}`)
   }
 }
