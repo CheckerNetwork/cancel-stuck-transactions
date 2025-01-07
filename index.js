@@ -33,12 +33,8 @@ export const cancelTx = ({
   })
 }
 
-// Switch back once Filfox is fixed
-// const FILFOX = 'https://filfox.info'
-const FILFOX = 'http://8.218.132.229'
-
 export const getRecentSendMessage = async () => {
-  let res = await fetch(`${FILFOX}/api/v1/message/list?method=Send`)
+  let res = await fetch('https://filfox.info/api/v1/message/list?method=Send')
   if (!res.ok) {
     const err = new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
     err.code = 'FILFOX_REQUEST_FAILED'
@@ -50,7 +46,7 @@ export const getRecentSendMessage = async () => {
   assert(sendMsg, 'No Send message found in the recent committed messages')
   const cid = sendMsg.cid
 
-  res = await fetch(`${FILFOX}/api/v1/message/${cid}`)
+  res = await fetch(`https://filfox.info/api/v1/message/${cid}`)
   if (!res.ok) {
     throw new Error(`Filfox request failed with ${res.status}: ${(await res.text()).trimEnd()}`)
   }
