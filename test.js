@@ -163,7 +163,9 @@ test('StuckTransactionsCanceller', async t => {
       const status = await stuckTransactionsCanceller.cancelOlderThan(0)
       assert.deepStrictEqual(status, [{
         status: 'fulfilled',
-        value: undefined
+        value: undefined,
+        isFulfilled: true,
+        isRejected: false
       }])
       assert.strictEqual(sentTransactions.length, 1)
       const sentTransactionClone = { ...sentTransactions[0] }
