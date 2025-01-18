@@ -126,7 +126,7 @@ export class StuckTransactionsCanceller {
     )
 
     return pSettle(
-      txsToCancel.map(tx => this.#cancelTx({
+      txsToCancel.map(async tx => this.#cancelTx({
         tx,
         recentGasLimit: recentSendMessage.gasLimit,
         recentGasFeeCap: Number(recentSendMessage.gasFeeCap)
