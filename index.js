@@ -85,14 +85,15 @@ export class StuckTransactionsCanceller {
 
   async removeConfirmed (tx) {
     assert.strictEqual(typeof tx.hash, 'string')
+    this.#log(`Removing ${tx.hash} and other tx with the same nonce...`)
     const txs = await this.#store.list()
     for (const _tx of txs) {
       if (_tx.nonce === tx.nonce) {
-        this.#log(`Resolving ${_tx.hash}...`)
         await this.#store.remove(_tx.hash)
-        this.#log(`Resolved ${_tx.hash} (confirmed or replaced)`)
+        this.#log(`Removed ${_tx.hash}`)
       }
     }
+    this.#log(`Removed ${tx.hash} and other tx with the same nonce`)
   }
 
   async cancelOlderThan (ageMs, { concurrency = 50 } = {}) {
