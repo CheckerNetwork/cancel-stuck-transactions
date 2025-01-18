@@ -94,7 +94,7 @@ export class StuckTransactionsCanceller {
     }
   }
 
-  async cancelOlderThan (ageMs) {
+  async cancelOlderThan (ageMs, { concurrency = 50 } = {}) {
     assert.strictEqual(typeof ageMs, 'number')
 
     this.#log('Checking for stuck transactions...')
@@ -130,7 +130,7 @@ export class StuckTransactionsCanceller {
         recentGasLimit: recentSendMessage.gasLimit,
         recentGasFeeCap: Number(recentSendMessage.gasFeeCap)
       })),
-      { concurrency: 50 }
+      { concurrency }
     )
   }
 
