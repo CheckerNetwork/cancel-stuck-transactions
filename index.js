@@ -1,5 +1,6 @@
 import assert from 'node:assert'
 import ms from 'ms'
+import pSettle from 'p-settle'
 
 export const cancelTx = ({
   tx,
@@ -123,11 +124,14 @@ export class StuckTransactionsCanceller {
       ')'
     )
 
-    return Promise.allSettled(txsToCancel.map(tx => this.#cancelTx({
-      tx,
-      recentGasLimit: recentSendMessage.gasLimit,
-      recentGasFeeCap: Number(recentSendMessage.gasFeeCap)
-    })))
+    return pSettle(
+      txsToCancel.map(tx => this.#cancelTx({
+        tx,
+        recentGasLimit: recentSendMessage.gasLimit,
+        recentGasFeeCap: Number(recentSendMessage.gasFeeCap)
+      })),
+      { concurrency: 50 }
+    )
   }
 
   async #cancelTx ({ tx, recentGasLimit, recentGasFeeCap }) {
